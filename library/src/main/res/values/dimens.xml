@@ -3,4 +3,8 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="startRadius">10dp</dimen>
+    <dimen name="ripple_radius_null">-1px</dimen>
+    <dimen name="ripple_dimen_radius">48dp</dimen>
+    <dimen name="ripple_finger_width">1dp</dimen>
+    <dimen name="flowbutton_shadow_radius_default">15dp</dimen>
 </resources>

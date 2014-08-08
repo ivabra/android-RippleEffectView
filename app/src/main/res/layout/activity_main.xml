@@ -12,20 +12,27 @@
     tools:context=".MainActivity">
 <RelativeLayout
     android:layout_width="match_parent"
-    android:layout_height="100dp">
+    android:layout_height="150dp">
     <com.dantelab.rippleeffectview.library.RippleEffectView
         android:id="@+id/ripple"
         android:layout_width="match_parent"
-        app:rippleStartAlpha="100"
         app:rippleClickDelay="150"
-        app:rippleColor="#676767"
+        app:rippleColor="#3c676767"
         app:rippleAnimationDuration="250"
         app:rippleEdgeType="soft"
         app:rippleSoftReverse="false"
+        app:rippleFillColor="#ad2f2f2f"
+        app:rippleShowFinger="true"
+        app:rippleRadius="auto"
+        app:rippleFingerColor="#00f"
+        app:rippleFingerWidth="2dp"
+        app:rippleFingerRadius="24dp"
+
         android:layout_height="match_parent" />
     <TextView
         android:id="@+id/text"
         android:gravity="center"
+
         android:text="Hello ripple!"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -202,8 +209,8 @@
                     android:id="@+id/animationSeekBar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:max="850"
-                    android:progress="250"
+                    android:max="3000"
+                    android:progress="500"
                     />
 
             </LinearLayout>

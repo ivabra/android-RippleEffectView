@@ -14,7 +14,6 @@ import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -53,7 +52,7 @@ public class MainActivity extends Activity {
                     public void onClick(View v) {
                         mText.setText("Just ripple click");
                         Toast.makeText(MainActivity.this, "Just click", Toast.LENGTH_SHORT).show();
-                        rippleEffectView.setBackgroundColor(Color.argb(64, (int)(Math.random()*255),(int)(Math.random()*255), (int)(Math.random()*255)));
+                        rippleEffectView.setBackgroundColor(Color.argb((int)(Math.random()*255), (int)(Math.random()*255),(int)(Math.random()*255), (int)(Math.random()*255)));
                     }
                 } : null);
             }
@@ -67,7 +66,7 @@ public class MainActivity extends Activity {
                     public boolean onLongClick(View v) {
 
                         mText.setText("Just ripple long click");
-                        rippleEffectView.setBackgroundColor(Color.argb(64, (int)(Math.random()*255),(int)(Math.random()*255), (int)(Math.random()*255)));
+                        rippleEffectView.setBackgroundColor(Color.argb((int)(Math.random()*255), (int)(Math.random()*255),(int)(Math.random()*255), (int)(Math.random()*255)));
                         return false;
                     }
                 } : null);
@@ -144,7 +143,7 @@ public class MainActivity extends Activity {
         ((SeekBar)findViewById(R.id.startAlphaSeekBar)).setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                rippleEffectView.setStartAlpha(progress);
+                rippleEffectView.setColorAlpha(progress);
             }
 
             @Override

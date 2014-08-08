@@ -2,42 +2,71 @@ package com.dantelab.rippleeffectview.library;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.graphics.Matrix;
 import android.graphics.Point;
+import android.graphics.Shader;
+import android.util.Log;
 import android.view.animation.DecelerateInterpolator;
-
-import java.lang.ref.WeakReference;
+import android.view.animation.LinearInterpolator;
 
 /**
  * Created by ivan on 04.08.14.
  */
 class RippleOval {
-   // private static int ANIMATION_DURATION_DEFAULT = 150;
+   // private static int DEF_ANIMATION_DURATION = 150;
     private Point mPoint;
-    private float mStartRadius, mEndRadius;
+    private float endRadius;
+    private float startRadius;
     private float mRadius;
     private int mAnimationDuration;
     private ValueAnimator mValueAnimator;
     private Listener mUpdateListener;
     private Animator.AnimatorListener mAnimatorListener;
-    private int mStartAlpha;
-    private int mAlpha;
-    private boolean mDismissAfrer;
+    private int startAlpha;
+    private int mShaderAlpha;
+    private int mBackgroundAlpha;
+    private int backgroundStartAlpha;
+    private boolean dismissAfrer;
+    private float mInAnimationValue;
+    private float mFadeAnimationValue;
+    //private Shader shader;
 
-    public RippleOval(int x, int y, final float startRadius, final float endRadius, int startAlpha, int animationDuration) {
+    public RippleOval(int x, int y, float startRadius, float endRadius,  int startAlpha, int backgroundStartAlpha, int animationDuration) {
+        init(x,y, startRadius, endRadius, startAlpha, animationDuration);
+        this.backgroundStartAlpha = mBackgroundAlpha= backgroundStartAlpha;
+    }
+
+
+    public RippleOval(int x, int y, float startRadius, float endRadius,  int startAlpha, int animationDuration) {
+        init(x,y, startRadius, endRadius, startAlpha, animationDuration);
+    }
+
+
+    public RippleOval(int x, int y, final float endRadius, int startAlpha, int animationDuration) {
+        init(x,y, 0, endRadius, startAlpha, animationDuration);
+    }
+
+    private void init(int x, int y,final float startRadius, final float endRadius, int startAlpha, int animationDuration){
         mPoint = new Point(x, y);
-        mStartAlpha = mAlpha = startAlpha;
-        mStartRadius = mRadius = startRadius;
-        mEndRadius = endRadius;
-        mDismissAfrer = true;
+        this.startAlpha = mShaderAlpha = startAlpha;
+        mRadius = this.startRadius = startRadius;
+        this.endRadius = endRadius;
+        dismissAfrer = true;
         mAnimationDuration = animationDuration;
 
-        mValueAnimator = ValueAnimator.ofFloat(mStartRadius,mEndRadius);
+        mInAnimationValue = 0;
+        mFadeAnimationValue = 0;
+
+      //  if (hasShader) mMatrix = new Matrix();
+
+        mValueAnimator = ValueAnimator.ofFloat(0,1);
         mValueAnimator.setDuration(animationDuration);
         mValueAnimator.setInterpolator(new DecelerateInterpolator());
         mValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                mRadius = (float) valueAnimator.getAnimatedValue();
+                mInAnimationValue = (float) valueAnimator.getAnimatedValue();
+                computeScaleAndAlpha();
                 notifyUpdateListener();
             }
         });
@@ -50,8 +79,13 @@ class RippleOval {
 
             @Override
             public void onAnimationEnd(Animator animator) {
-                if (mDismissAfrer)
-                initAlphaAnimator();
+                mInAnimationValue = 1;
+                mFadeAnimationValue = 0;
+
+                computeScaleAndAlpha();
+
+                if (dismissAfrer)
+                    initAlphaAnimator();
                 else {
                     if (mAnimatorListener != null) mAnimatorListener.onAnimationEnd(animator);
                 }
@@ -60,7 +94,16 @@ class RippleOval {
 
             @Override
             public void onAnimationCancel(Animator animator) {
-                if (mAnimatorListener != null) mAnimatorListener.onAnimationCancel(animator);
+                mInAnimationValue = 1;
+                mFadeAnimationValue = 0;
+
+                computeScaleAndAlpha();
+
+                if (dismissAfrer)
+                    initAlphaAnimator();
+                else {
+                    if (mAnimatorListener != null) mAnimatorListener.onAnimationEnd(animator);
+                }
             }
 
             @Override
@@ -68,19 +111,29 @@ class RippleOval {
 
             }
         });
-
     }
+
+    void computeScaleAndAlpha(){
+       mRadius = startRadius + Math.round((endRadius - startRadius)* mInAnimationValue);
+        mShaderAlpha = Math.round(startAlpha * (1-mFadeAnimationValue));
+        mBackgroundAlpha = Math.round(backgroundStartAlpha * Math.max(1- mInAnimationValue - mFadeAnimationValue, 0));
+      //  Log.d("ripple", "radius: " + mRadius + " shaderAlpha: " + mShaderAlpha + " bgAlpha: " + mBackgroundAlpha  + " IValue: " + mInAnimationValue);
+    }
+
+
+
 
     private void initAlphaAnimator(){
 
-        ValueAnimator newAnimator = ValueAnimator.ofInt(mStartAlpha, 0);
+        ValueAnimator newAnimator = ValueAnimator.ofFloat(0, 1);
         newAnimator.setDuration((long) (mAnimationDuration*0.5));
 
-        newAnimator.setInterpolator(new DecelerateInterpolator());
+        newAnimator.setInterpolator(new LinearInterpolator());
         newAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                mAlpha = (int) valueAnimator.getAnimatedValue();
+                mFadeAnimationValue = (float) valueAnimator.getAnimatedValue();
+                computeScaleAndAlpha();
                 notifyUpdateListener();
             }
         });
@@ -92,11 +145,15 @@ class RippleOval {
 
             @Override
             public void onAnimationEnd(Animator animator) {
+                mFadeAnimationValue =1;
+                computeScaleAndAlpha();
                 if (mAnimatorListener != null) mAnimatorListener.onAnimationEnd(animator);
             }
 
             @Override
             public void onAnimationCancel(Animator animator) {
+                mFadeAnimationValue = 1;
+                computeScaleAndAlpha();
                 if (mAnimatorListener != null) mAnimatorListener.onAnimationCancel(animator);
 
             }
@@ -107,18 +164,16 @@ class RippleOval {
             }
         });
 
-        newAnimator.start();
         if (mValueAnimator!=null){
             mValueAnimator.removeAllListeners();
         }
+        newAnimator.start();
         mValueAnimator = newAnimator;
     }
 
     private void notifyUpdateListener(){
         if (mUpdateListener!=null)mUpdateListener.update();
     }
-
-
 
     public Point getPoint() {
         return mPoint;
@@ -148,16 +203,12 @@ class RippleOval {
         mUpdateListener = listener;
     }
 
-    public int getAlpha() {
-        return mAlpha;
-    }
 
     public void setFadeOutAfter(boolean b) {
-        mDismissAfrer = b;
+        dismissAfrer = b;
     }
 
     public void startAlphaAnimation(Animator.AnimatorListener animatorListener) {
-
         mAnimatorListener = null;
         initAlphaAnimator();
         mAnimatorListener = animatorListener;
@@ -168,20 +219,41 @@ class RippleOval {
         mPoint.set(x, y);
     }
 
-
-    public interface Listener{
-        void update();
+    public float getInAnimationFraction() {
+        return mInAnimationValue;
     }
 
-    public float getStartRadius() {
-        return mStartRadius;
+    public float getFadeAnimationFraction() {
+        return mFadeAnimationValue;
     }
+
 
     public int getStartAlpha() {
-        return mStartAlpha;
+        return startAlpha;
     }
 
     public float getEndRadius() {
-        return mEndRadius;
+        return endRadius;
     }
+
+//    public void setShader(Shader shader) {
+//        this.shader = shader;
+//    }
+
+
+    public static interface Listener{
+        void update();
+    }
+
+    public int getShaderAlpha() {
+        return mShaderAlpha;
+    }
+
+    public int getBackgroundAlpha() {
+        return mBackgroundAlpha;
+    }
+
+//    public Shader getShader() {
+//        return shader;
+//    }
 }

@@ -3,13 +3,28 @@
     <declare-styleable name="RippleEffectView">
         <attr name="rippleColor" format="color"/>
         <attr name="rippleAnimationDuration" format="integer"/>
-        <attr name="rippleStartAlpha" format="integer"/>
         <attr name="rippleClickDelay" format="integer"/>
         <attr name="rippleSoftReverse" format="boolean"/>
         <attr name="rippleEnable" format="boolean"/>
+        <attr name="rippleRadius" format="dimension|integer">
+            <enum name="auto" value="1"/>
+        </attr>
+        <attr name="rippleShowFinger" format="boolean"/>
+        <attr name="rippleFingerColor" format="color"/>
+        <attr name="rippleFingerRadius" format="dimension"/>
+        <attr name="rippleFingerWidth" format="dimension"/>
         <attr name="rippleEdgeType" format="enum">
             <enum name="soft" value="0"/>
             <enum name="strong" value="1"/>
         </attr>
+        <attr name="rippleFillColor" format="color"/>
+
+        <attr name="rippleStyle" format="enum">
+            <enum name="android_bounded" value="1"/>
+            <enum name="android_unbounded" value="2"/>
+            <enum name="android_soft" value="3"/>
+        </attr>
     </declare-styleable>
+
+
 </resources>
