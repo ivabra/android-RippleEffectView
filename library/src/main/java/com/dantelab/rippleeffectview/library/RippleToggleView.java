@@ -53,8 +53,8 @@ public class RippleToggleView extends CheckBox implements View.OnTouchListener {
                 R.styleable.RippleEffectView,
                 0, 0);
         try {
-            mRippleColor = a.getColor(R.styleable.RippleEffectView_rippleColor, Color.argb(255, 127, 127, 127));
-            mAnimationDuration = a.getInt(R.styleable.RippleEffectView_rippleAnimationDuration, 150);
+            mRippleColor = a.getColor(R.styleable.RippleEffectView_ripple_color, Color.argb(255, 127, 127, 127));
+            mAnimationDuration = a.getInt(R.styleable.RippleEffectView_ripple_animationDuration, 150);
         } finally {
             a.recycle();
         }

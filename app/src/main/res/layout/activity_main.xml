@@ -16,18 +16,14 @@
     <com.dantelab.rippleeffectview.library.RippleEffectView
         android:id="@+id/ripple"
         android:layout_width="match_parent"
-        app:rippleClickDelay="150"
-        app:rippleColor="#3c676767"
-        app:rippleAnimationDuration="250"
-        app:rippleEdgeType="soft"
-        app:rippleSoftReverse="false"
-        app:rippleFillColor="#ad2f2f2f"
-        app:rippleShowFinger="true"
-        app:rippleRadius="auto"
-        app:rippleFingerColor="#00f"
-        app:rippleFingerWidth="2dp"
-        app:rippleFingerRadius="24dp"
-
+        app:ripple_clickDelay="150"
+        app:ripple_color="#3c676767"
+        app:ripple_animationDuration="250"
+        app:ripple_edgeType="strong"
+        app:ripple_softReverse="false"
+        app:ripple_fillColor="#ad939393"
+        app:ripple_radius="auto"
+        app:ripple_moveToCenter="true"
         android:layout_height="match_parent" />
     <TextView
         android:id="@+id/text"

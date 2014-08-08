@@ -14,7 +14,7 @@ import android.view.animation.LinearInterpolator;
  */
 class RippleOval {
    // private static int DEF_ANIMATION_DURATION = 150;
-    private Point mPoint;
+    private Point mPoint, mCenter, mNewPoint;
     private float endRadius;
     private float startRadius;
     private float mRadius;
@@ -29,6 +29,7 @@ class RippleOval {
     private boolean dismissAfrer;
     private float mInAnimationValue;
     private float mFadeAnimationValue;
+
     //private Shader shader;
 
     public RippleOval(int x, int y, float startRadius, float endRadius,  int startAlpha, int backgroundStartAlpha, int animationDuration) {
@@ -53,7 +54,7 @@ class RippleOval {
         this.endRadius = endRadius;
         dismissAfrer = true;
         mAnimationDuration = animationDuration;
-
+        mNewPoint = new Point(mPoint);
         mInAnimationValue = 0;
         mFadeAnimationValue = 0;
 
@@ -65,6 +66,7 @@ class RippleOval {
         mValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
+              //  Log.d("onAnimatorUpdate", "InAnimator");
                 mInAnimationValue = (float) valueAnimator.getAnimatedValue();
                 computeScaleAndAlpha();
                 notifyUpdateListener();
@@ -79,6 +81,7 @@ class RippleOval {
 
             @Override
             public void onAnimationEnd(Animator animator) {
+              //  Log.d("onAnimatorEnd", "inAnimator");
                 mInAnimationValue = 1;
                 mFadeAnimationValue = 0;
 
@@ -115,8 +118,12 @@ class RippleOval {
 
     void computeScaleAndAlpha(){
        mRadius = startRadius + Math.round((endRadius - startRadius)* mInAnimationValue);
-        mShaderAlpha = Math.round(startAlpha * (1-mFadeAnimationValue));
-        mBackgroundAlpha = Math.round(backgroundStartAlpha * Math.max(1- mInAnimationValue - mFadeAnimationValue, 0));
+        float alphaFraction = Math.max(1- (mInAnimationValue + mFadeAnimationValue)*0.5f,0);
+        mShaderAlpha = (int) (startAlpha * alphaFraction);
+        mBackgroundAlpha = (int) (backgroundStartAlpha * alphaFraction);
+        if (mCenter!=null)
+        mNewPoint.set((int)((mCenter.x - mPoint.x)*mInAnimationValue) + mPoint.x, (int)((mCenter.y - mPoint.y)*mInAnimationValue) + mPoint.y);
+
       //  Log.d("ripple", "radius: " + mRadius + " shaderAlpha: " + mShaderAlpha + " bgAlpha: " + mBackgroundAlpha  + " IValue: " + mInAnimationValue);
     }
 
@@ -132,6 +139,7 @@ class RippleOval {
         newAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
+             //   Log.d("onAnimatorUpdate", "fadeAnimator");
                 mFadeAnimationValue = (float) valueAnimator.getAnimatedValue();
                 computeScaleAndAlpha();
                 notifyUpdateListener();
@@ -145,6 +153,7 @@ class RippleOval {
 
             @Override
             public void onAnimationEnd(Animator animator) {
+               // Log.d("onAnimatorEnd", "fadeAnimator");
                 mFadeAnimationValue =1;
                 computeScaleAndAlpha();
                 if (mAnimatorListener != null) mAnimatorListener.onAnimationEnd(animator);
@@ -164,9 +173,6 @@ class RippleOval {
             }
         });
 
-        if (mValueAnimator!=null){
-            mValueAnimator.removeAllListeners();
-        }
         newAnimator.start();
         mValueAnimator = newAnimator;
     }
@@ -236,6 +242,7 @@ class RippleOval {
         return endRadius;
     }
 
+
 //    public void setShader(Shader shader) {
 //        this.shader = shader;
 //    }
@@ -253,7 +260,17 @@ class RippleOval {
         return mBackgroundAlpha;
     }
 
-//    public Shader getShader() {
+    public void  setCenter(int x, int y){
+        mCenter = new Point(x, y);
+        if (mNewPoint == null) mNewPoint = new Point(mPoint.x, mPoint.y);
+    }
+
+    public Point getNewPoint() {
+        return mNewPoint;
+    }
+
+
+    //    public Shader getShader() {
 //        return shader;
 //    }
 }

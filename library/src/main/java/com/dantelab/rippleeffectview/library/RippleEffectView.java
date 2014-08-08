@@ -13,6 +13,7 @@ import android.graphics.Shader;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,7 +25,6 @@ import java.util.ArrayList;
  * Created by ivan on 04.08.14.
  */
 public class RippleEffectView extends View {
-
 
 
 
@@ -46,15 +46,18 @@ public class RippleEffectView extends View {
     private static final RIPPLE_TYPE DEF_EDGE_TYPE = RIPPLE_TYPE.SOFT;
     private static final boolean DEF_REVERSE = false;
     private static final boolean DEF_ENABLE = true;
-    private static final boolean DEF_SHOW_FINGER = false;
-    private static final int DEF_FINGER_COLOR = Color.argb(55,127,127,127);
 
-    private int DEF_FINGER_WIDTH(){
+    private static boolean DEF_MOVE_TO_CENTER = false;
+
+ //   private static final boolean DEF_SHOW_FINGER = false;
+  //  private static final int DEF_FINGER_COLOR = Color.argb(55,127,127,127);
+
+ /*   private int DEF_FINGER_WIDTH(){
         return getResources().getDimensionPixelSize(R.dimen.ripple_finger_width);
     }
     private int DEF_FINGER_RADIUS(){
         return getResources().getDimensionPixelSize(R.dimen.ripple_dimen_radius);
-    };
+    };*/
 
 
     private RIPPLE_TYPE mRippleEdgeEffectType;
@@ -62,16 +65,17 @@ public class RippleEffectView extends View {
     private RippleOval mCurrentShape;
 
     private int mRippleColor;
-    private int mFingerTouchWidth;
+   // private int mFingerTouchWidth;
     private int mAnimationDuration;
     private long mClickDelay;
     private boolean mReverse;
     private boolean mRippleEnable;
     private int  mRippleFillColor;
     private int mRippleRadius;
-    private float mFingerTouchRadius;
+    private boolean mRippleMoveToCenter;
+  /*  private float mFingerTouchRadius;
     private int mFingerTouchColor;
-    private boolean mFingerTouchShow;
+    private boolean mFingerTouchShow;*/
 
 
     private Rect mDrawRect;
@@ -83,7 +87,7 @@ public class RippleEffectView extends View {
     private OnLongClickListener mLongClickListener;
 
 
-    public boolean isShowFingerTouch() {
+   /* public boolean isShowFingerTouch() {
         return mFingerTouchShow;
     }
 
@@ -109,6 +113,15 @@ public class RippleEffectView extends View {
     public void setFingerTouchRadius(float fingerTouchRadius) {
         this.mFingerTouchRadius = fingerTouchRadius;
         invalidate();
+    }*/
+
+
+    public boolean isRippleMoveToCenter() {
+        return mRippleMoveToCenter;
+    }
+
+    public void setRippleMoveToCenter(boolean rippleMoveToCenter) {
+        this.mRippleMoveToCenter = rippleMoveToCenter;
     }
 
     public void setRippleRadius(int rippleRadius) {
@@ -268,11 +281,12 @@ public class RippleEffectView extends View {
                     if (mRippleRadius < 0) {
                         float w = getWidth();
                         float h = getHeight();
-                        radius = (float) Math.sqrt(w * w + h * h);
+                        radius = (float) Math.sqrt(w * w + h * h)/2;
                     } else {
                         radius = mRippleRadius;
                     }
                     final RippleOval sh = new RippleOval((int) _x, (int) _y, 0, radius, Color.alpha(mRippleColor), Color.alpha(mRippleFillColor), mAnimationDuration);
+                    if (mRippleMoveToCenter)sh.setCenter(getWidth()/2, getHeight()/2);
                     sh.setFadeOutAfter(false);
 
                     sh.setAnimatorListener(new ShapeAnimatorListener(sh){
@@ -288,10 +302,7 @@ public class RippleEffectView extends View {
                                             mLongClickListener.onLongClick(RippleEffectView.this);
                                         }
                                         getShape().startAlphaAnimation(new ShapeAnimatorRemoveListener(getShape()));
-
                                     }
-                                } else {
-                                    getShape().startAlphaAnimation(new ShapeAnimatorRemoveListener(getShape()));
                                 }
                             }
 
@@ -324,8 +335,8 @@ public class RippleEffectView extends View {
                         return false;
                     } else {
 
-                        if (mRippleEdgeEffectType == RIPPLE_TYPE.SOFT || mFingerTouchShow)
-                        if (mCurrentShape!=null){
+                        if (mRippleEdgeEffectType == RIPPLE_TYPE.SOFT)
+                        if (mCurrentShape!=null && mRippleMoveToCenter){
                             mCurrentShape.setXY((int)_x, (int)_y);
                             invalidate();
                         }
@@ -393,10 +404,11 @@ public class RippleEffectView extends View {
         mRippleFillColor = DEF_FILL_COLOR;
         mRippleEdgeEffectType = DEF_EDGE_TYPE;
         mRippleRadius = DEF_RIPPLE_RADIUS;
-        mFingerTouchShow = DEF_SHOW_FINGER;
+        mRippleMoveToCenter = DEF_MOVE_TO_CENTER;
+       /* mFingerTouchShow = DEF_SHOW_FINGER;
         mFingerTouchRadius = DEF_FINGER_RADIUS();
         mFingerTouchColor = DEF_FINGER_COLOR;
-        mFingerTouchWidth = DEF_FINGER_WIDTH();
+        mFingerTouchWidth = DEF_FINGER_WIDTH();*/
         super.setOnTouchListener(mInternalTouchListener);
     }
 
@@ -413,29 +425,30 @@ public class RippleEffectView extends View {
                 0, 0);
 
         try {
-            mRippleColor = a.getColor(R.styleable.RippleEffectView_rippleColor, DEF_COLOR);
-            mAnimationDuration = a.getInt(R.styleable.RippleEffectView_rippleAnimationDuration, DEF_ANIMATION_DURATION);
-            mClickDelay = a.getInt(R.styleable.RippleEffectView_rippleClickDelay, DEF_CLICK_DELAY);
-            mReverse = a.getBoolean(R.styleable.RippleEffectView_rippleSoftReverse, DEF_REVERSE);
-            mRippleEnable =a.getBoolean(R.styleable.RippleEffectView_rippleEnable, DEF_ENABLE);
-            mRippleFillColor = a.getColor(R.styleable.RippleEffectView_rippleFillColor, DEF_FILL_COLOR);
-            mFingerTouchShow = a.getBoolean(R.styleable.RippleEffectView_rippleShowFinger, DEF_SHOW_FINGER);
+            mRippleColor = a.getColor(R.styleable.RippleEffectView_ripple_color, DEF_COLOR);
+            mAnimationDuration = a.getInt(R.styleable.RippleEffectView_ripple_animationDuration, DEF_ANIMATION_DURATION);
+            mClickDelay = a.getInt(R.styleable.RippleEffectView_ripple_clickDelay, DEF_CLICK_DELAY);
+            mReverse = a.getBoolean(R.styleable.RippleEffectView_ripple_softReverse, DEF_REVERSE);
+            mRippleEnable =a.getBoolean(R.styleable.RippleEffectView_ripple_enable, DEF_ENABLE);
+            mRippleFillColor = a.getColor(R.styleable.RippleEffectView_ripple_fillColor, DEF_FILL_COLOR);
+            mRippleMoveToCenter = a.getBoolean(R.styleable.RippleEffectView_ripple_moveToCenter, DEF_MOVE_TO_CENTER);
+            /*mFingerTouchShow = a.getBoolean(R.styleable.RippleEffectView_rippleShowFinger, DEF_SHOW_FINGER);
             mFingerTouchColor = a.getColor(R.styleable.RippleEffectView_rippleFingerColor, DEF_FINGER_COLOR);
             mFingerTouchRadius = a.getDimensionPixelSize(R.styleable.RippleEffectView_rippleFingerRadius, DEF_FINGER_RADIUS());
-            mFingerTouchWidth = a.getDimensionPixelSize(R.styleable.RippleEffectView_rippleFingerWidth, DEF_FINGER_WIDTH());
+            mFingerTouchWidth = a.getDimensionPixelSize(R.styleable.RippleEffectView_rippleFingerWidth, DEF_FINGER_WIDTH());*/
 
             TypedValue val = new TypedValue();
-            if (a.getValue(R.styleable.RippleEffectView_rippleRadius, val)){
+            if (a.getValue(R.styleable.RippleEffectView_ripple_radius, val)){
                 if (val.type == TypedValue.TYPE_INT_DEC){
                     mRippleRadius = DEF_RIPPLE_RADIUS;
                 } else {
-                    mRippleRadius =a.getDimensionPixelSize(R.styleable.RippleEffectView_rippleRadius, -1);
+                    mRippleRadius =a.getDimensionPixelSize(R.styleable.RippleEffectView_ripple_radius, -1);
                 }
             } else {
                 mRippleRadius = DEF_RIPPLE_RADIUS;
             }
 
-            int type = a.getInt(R.styleable.RippleEffectView_rippleEdgeType, -1);
+            int type = a.getInt(R.styleable.RippleEffectView_ripple_edgeType, -1);
 
             switch (type){
                 case 1:
@@ -471,12 +484,13 @@ public class RippleEffectView extends View {
     protected void onDraw(Canvas canvas) {
         mPaint.setStyle(Paint.Style.FILL);
         for (RippleOval shape : mOvalShapes) {
+          //  Log.d("onDraw", "alpha "+shape.getShaderAlpha() + " bgAlpha " + shape.getBackgroundAlpha());
             if (mRippleFillColor!=Color.TRANSPARENT)
             drawBackground(canvas, shape);
             drawShader(canvas, shape);
-            if (mFingerTouchShow){
+           /* if (mFingerTouchShow){
                 drawFinger(canvas, shape);
-            }
+            }*/
         }
     }
 
@@ -490,7 +504,7 @@ public class RippleEffectView extends View {
     }
 
     private void drawShader(Canvas canvas, RippleOval shape){
-        Point point = shape.getPoint();
+        Point point = shape.getNewPoint();
         switch (mRippleEdgeEffectType){
             case STRONG:
                 mPaint.setShader(null);
@@ -511,7 +525,7 @@ public class RippleEffectView extends View {
     }
 
 
-
+/*
     private void drawFinger(Canvas canvas, RippleOval shape){
         Point point = shape.getPoint();
         mPaint.setShader(null);
@@ -521,7 +535,7 @@ public class RippleEffectView extends View {
         mPaint.setStrokeWidth(mFingerTouchWidth);
         mPaint.setStyle(Paint.Style.STROKE);
         canvas.drawCircle(point.x, point.y, mFingerTouchRadius * shape.getInAnimationFraction(), mPaint);
-    }
+    }*/
 
 
 
@@ -578,6 +592,7 @@ public class RippleEffectView extends View {
         @Override
         public void endAnimation(Animator animation) {
             super.endAnimation(animation);
+           // Log.d("endAnimation",  getShape().toString());
             mOvalShapes.remove(getShape());
             postInvalidate();
         }
